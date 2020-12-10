@@ -1,0 +1,229 @@
+#configfile: "config.yaml"
+bwa_path='/n/app/bwa/0.7.17/bin'
+samtools_path='/n/data1/hms/dbmi/park/simon_chu/tools/hap.py-build/bin'
+tabix_path='~/anaconda2/bin'
+trafic_path='/n/data1/hms/dbmi/park/simon_chu/projects/XTEA/xTEA_paper/HG002/cmp_somatic/TraFiC_mem/software/TraFiC'
+genome='/n/data1/hms/dbmi/park/SOFTWARE/LongRanger/refdata-b37-2.1.0/fasta/genome.fa'
+full_path_to_databases=trafic_path+'/databases/hg19'
+
+
+output_dir = config["output_dir"]
+user_id=config["user_id"]
+project=config["project"]
+sample_name=config["sample_name"]
+tumour_name=config["tumour_name"]	
+tumour_bam=config["tumour_bam"]
+normal_name=config["normal_name"]
+normal_bam=config["normal_bam"]
+bwa_threads=config["bwa_threads"]
+
+
+
+output_tumour_samtools= output_dir +'/'+ sample_name +'/'+tumour_name+'/'+tumour_name+'.plusandminus_reads.tr.fa'
+output_normal_samtools= output_dir +'/'+ sample_name +'/'+normal_name+'/'+normal_name+'.plusandminus_reads.tr.fa'
+
+output_tumour_bwamem= output_dir +'/'+ sample_name +'/'+tumour_name +'/MASKEDreads_menos.ok.PolyA.txt'
+output_normal_bwamem= output_dir +'/'+ sample_name +'/'+normal_name +'/MASKEDreads_menos.ok.PolyA.txt'
+
+output_tumour_split_by_element_type = output_dir +'/'+ sample_name  +'/'+ tumour_name +'/'+ 'MASKEDreads_ERVK_menos.ok.txt'
+output_normal_split_by_element_type = output_dir +'/'+ sample_name  +'/'+ normal_name +'/'+ 'MASKEDreads_ERVK_menos.ok.txt'
+
+output_tumour_clustering = output_dir +'/'+ sample_name  +'/'+ tumour_name +'/'+ 'clusters.PolyA.masymenos.txt'
+output_normal_clustering = output_dir +'/'+ sample_name  +'/'+ normal_name +'/'+ 'clusters.PolyA.masymenos.txt'
+
+output_tumour_cluster_MGE = output_dir +'/'+ sample_name  +'/'+ tumour_name +'/'+ tumour_name +'.MGE4C.TEs_ci'
+output_normal_cluster_MGE = output_dir +'/'+ sample_name  +'/'+ normal_name +'/'+ normal_name +'.MGE4C.TEs_ci'
+
+output_tumour_transductions = output_dir  +'/'+ sample_name   +'/'+ tumour_name +'/'+ tumour_name +'.chrneg.td.sam'
+output_normal_transductions = output_dir  +'/'+ sample_name   +'/'+ normal_name +'/'+ normal_name +'.chrneg.td.sam'
+
+output_tumour_cluster_transductions = output_dir  +'/'+ sample_name   +'/'+ tumour_name +'/'+ tumour_name +'.chr2chr4C.TEs_ci'
+output_normal_cluster_transductions = output_dir  +'/'+ sample_name   +'/'+ normal_name +'/'+ normal_name +'.chr2chr4C.TEs_ci'
+
+output_tx = output_dir +'/'+ sample_name   +'/'+ 'trafic_mem_output.txt'
+
+output_get_teiba_input =  output_dir  +'/'+ sample_name   +'/'+ sample_name +'.TraFiC.tsv'
+
+output_run_teiba_pipeline = output_dir  +'/'+ sample_name   +'/'+ sample_name +'.TraFiC.vcf'
+
+rule end_and_clear:
+	input:
+		#targets for tumour_samtools and normal_samtools
+		#output_tumour_samtools, output_normal_samtools
+		#targets for tumour_bwamem and normal_bwamem
+		#output_tumour_bwamem, output_normal_bwamem
+		#targets for tumour_split_by_element_type, normal_split_by_element_type and tumour_clustering, normal_clustering
+		#output_tumour_cluster_MGE,output_normal_cluster_MGE,output_tumour_transductions,output_normal_transductions
+		#targets for tumour_cluster_MGE, 
+		#output_tumour_cluster_MGE,output_normal_cluster_MGE,output_tumour_cluster_transductions,output_normal_cluster_transductions,output_tx
+		#final target for Trafic
+		#output_tx
+		#output_get_teiba_input
+		output_run_teiba_pipeline
+	shell:
+		"bash {trafic_path}/scripts/final_cleanup.sh {sample_name} {normal_name} {tumour_name} {output_dir}"		
+	
+		
+#WORK WITH TUMOUR
+rule tumour_samtools:
+	input:
+		tumour_bam
+	output:
+		output_tumour_samtools
+	shell:
+		"bash {trafic_path}/scripts/samtools.sh {sample_name} {tumour_name} {tumour_bam} {trafic_path} {output_dir} {samtools_path} {full_path_to_databases}"
+	
+rule normal_samtools:
+	input:
+		normal_bam
+	output:
+		output_normal_samtools
+	shell:
+		"bash {trafic_path}/scripts/samtools.sh {sample_name} {normal_name} {normal_bam} {trafic_path} {output_dir} {samtools_path} {full_path_to_databases}"
+
+rule normal_bwamem:
+	input:
+		output_normal_samtools
+	output:
+		output_normal_bwamem
+	
+	threads: bwa_threads
+	
+	shell:
+		"bash {trafic_path}/scripts/bwamem.sh {sample_name} {normal_name} {trafic_path} {output_dir} {bwa_path} {bwa_threads} {full_path_to_databases}"
+		
+rule tumour_bwamem:
+	input:
+		output_tumour_samtools
+	output:
+		output_tumour_bwamem 
+	
+	threads: bwa_threads
+	
+	shell:
+		"bash {trafic_path}/scripts/bwamem.sh {sample_name} {tumour_name} {trafic_path} {output_dir} {bwa_path} {bwa_threads} {full_path_to_databases}"
+
+rule tumour_split_by_element_type:
+	input:
+		 output_tumour_bwamem
+	output:
+		 output_tumour_split_by_element_type
+	shell:
+		"bash {trafic_path}/scripts/separate_elements.sh {sample_name} {tumour_name} {output_dir}"
+	#log:
+	#	"{output_dir}/tumour_split_by_element_type.log.txt"
+	
+rule normal_split_by_element_type:
+	input:
+		 output_normal_bwamem
+	output:
+		 output_normal_split_by_element_type
+	shell:
+		"bash {trafic_path}/scripts/separate_elements.sh {sample_name} {normal_name} {output_dir}"
+	#log:
+	#	"{output_dir}/normal_split_by_element_type.log.txt"
+	
+rule tumour_clustering:
+	input:
+		 output_tumour_split_by_element_type
+	output:
+		output_tumour_clustering
+	shell:
+		"bash {trafic_path}/scripts/tumour_clustering.sh  {sample_name} {tumour_name} {trafic_path} {output_dir}"
+
+rule normal_clustering:
+	input:
+		 output_normal_split_by_element_type
+	output:
+		output_normal_clustering
+	shell:
+		"bash {trafic_path}/scripts/normal_clustering.sh  {sample_name} {normal_name} {trafic_path} {output_dir}"
+
+rule tumour_cluster_MGE:
+	input:
+		output_tumour_clustering
+	output:
+		output_tumour_cluster_MGE
+	shell:
+		"bash {trafic_path}/scripts/tumour_cluster_MGE.sh {sample_name} {tumour_name} {trafic_path} {output_dir}"
+
+rule normal_TEs:
+	input:
+		output_normal_clustering
+	output:
+		output_normal_cluster_MGE
+	shell:
+		"bash {trafic_path}/scripts/normal_TEs.sh {sample_name} {normal_name} {trafic_path} {output_dir}"
+
+rule tumour_transductions:
+	input:
+		output_tumour_samtools
+	output:
+		output_tumour_transductions
+	shell:
+		"bash {trafic_path}/scripts/transductions.sh {sample_name} {tumour_name} {trafic_path} {output_dir}"
+
+rule normal_transductions:
+	input:
+		output_normal_samtools
+	output:
+		output_normal_transductions
+	shell:
+		"bash {trafic_path}/scripts/transductions.sh {sample_name} {normal_name} {trafic_path} {output_dir}"
+
+rule tumour_cluster_transductions:
+	input:
+		output_tumour_transductions, output_tumour_cluster_MGE
+	output:
+		output_tumour_cluster_transductions
+	shell:
+		"bash {trafic_path}/scripts/cluster_transductions.sh {sample_name} {tumour_name} {trafic_path} {output_dir}"
+		
+rule normal_cluster_transductions:
+	input:
+		output_normal_transductions, output_normal_cluster_MGE
+	output:
+		output_normal_cluster_transductions
+	shell:
+		"bash {trafic_path}/scripts/cluster_transductions.sh {sample_name} {normal_name} {trafic_path} {output_dir}"
+		
+
+##WORK WITH BOTH NORMAL AND TUMOUR
+rule t0_t1_td1_t2_td2:
+	input:
+		output_tumour_cluster_MGE,
+		output_normal_cluster_MGE,
+		output_normal_samtools,
+		output_tumour_samtools,
+		output_tumour_cluster_transductions,
+		output_normal_cluster_transductions
+		
+	output:
+		output_tx
+	shell:
+		"bash {trafic_path}/scripts/tx_pancancer.sh {sample_name} {tumour_name} {normal_name} {trafic_path} {tabix_path} {output_dir} {full_path_to_databases}"
+
+
+#TEIBA
+rule get_teiba_input:
+	input:
+		output_tx
+	output:
+		output_get_teiba_input
+	shell:
+		'''
+		echo -e "td0\t{output_dir}/{sample_name}/filter3.td0.4C.txt" >  {output_dir}/{sample_name}/clusters_path.tsv;
+		echo -e "td1\t{output_dir}/{sample_name}/filter3.td1.4C.txt" >> {output_dir}/{sample_name}/clusters_path.tsv;
+		echo -e "td2\t{output_dir}/{sample_name}/filter3.td2.4C.txt" >> {output_dir}/{sample_name}/clusters_path.tsv;
+		python {trafic_path}/TEIBA/somaticMEI4bkpAssembly.py {output_tx} {output_dir}/{sample_name}/clusters_path.tsv {trafic_path}/TEIBA/ref/PCAWG_sourceElements_metadata.tsv {sample_name} -o {output_dir}/{sample_name};
+		'''
+
+rule run_teiba_pipeline:
+	input:
+		output_get_teiba_input,
+		tumour_bam,
+		genome
+	output:
+		output_run_teiba_pipeline
+	shell:
+		"bash {trafic_path}/TEIBA/TEIBA.sh --no-cleanup -i {output_get_teiba_input} -b {tumour_bam} -g {genome} -d {trafic_path}/TEIBA/ref/repeats_repeatMasker_hg19.bed --sample-id {sample_name} --file-name {sample_name}.TraFiC -o {output_dir}/{sample_name} --filters 'SCORE,DUP' --score-L1-TD0 2 --score-L1-TD1 2 --score-L1-TD2 2 --score-Alu 4 --score-SVA 4 --score-ERVK 5"
