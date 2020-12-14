@@ -1,0 +1,9 @@
+xTea:208
+Palmer:203
+1. use Palmer corrected as bcmk (slack 200)
+168/203
+
+2. use Palmer raw as bcmk 
+141/203  (slack 200)
+151/203 (slack 300)
+159/203 (slack 400)
