@@ -19,10 +19,10 @@ python x_cmp.py -L --list multi_platform_rslts.txt  --bcmk bcmk.vcf  --extnd 100
 ```
 Where, 
 ```
-`-L`: indicates this is comparing a list of results;
-`--list`: is the result list in a file with each line in format `result_path TE-Type ID`;
-`--bcmk`: is the benchmark file;
-`--extnd`: is the slack value when comparing two breakpoints;
-`-o`: is the output prefix
+-L: indicates this is comparing a list of results;
+--list: is the result list in a file with each line in format `result_path TE-Type ID`;
+--bcmk: is the benchmark file;
+--extnd: is the slack value when comparing two breakpoints;
+-o: is the output prefix
 ```
 
