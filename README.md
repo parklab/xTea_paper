@@ -1,4 +1,4 @@
-# xTea_paper
+# Commands, scripts, and results of the xTea paper
 
 ## Commands to run different tools
 Folder `run_tools` contains the commands used to run different tools. Each subfolder is for one tool, which contains the results used in the comparisons
@@ -25,4 +25,3 @@ Where,
 --extnd: is the slack value when comparing two breakpoints;
 -o: is the output prefix
 ```
-
