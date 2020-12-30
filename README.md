@@ -12,6 +12,9 @@ Folder `NA12878_L1_cmp` contains the L1 comparison between xTean and another "L1
 ## Genotype
 Folder `Genotype_cmp` contains the comparison with one set of PCR validate genotype "benchmark" (Payer, Lindsay M., et al. PNAS 2017).
 
+## CHM13 Centromeric L1
+Folder `CHM13_centromere_L1` contains the RepeatMasker annotation of CHM13 v1.0 assembly and the selected full length centromeric L1. And also xTea's output of the detected ghost L1s.
+
 ## Scripts to compare two results
 We developped `x_cmp.py` for results comparison. To run it:
 ```
