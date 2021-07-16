@@ -21,7 +21,7 @@ TSD: target site duplication sequence
 insertion sequence: sequence of the assembled insertion
 5' transduction sequence: sequence of the 5' transduction
 3' transduction sequence: sequence of the 3' transduction
-polyA: whether this is a polyA tail detected
+polyA: whether there is a polyA tail detected
 ```
 
 
