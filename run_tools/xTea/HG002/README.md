@@ -1,6 +1,6 @@
 # Output information
 
-## Convert short reads output to VCF (this step will be automatically in the pipeline)
+## Convert short reads output to VCF (this step will run automatically in the pipeline)
 
 ```
 
